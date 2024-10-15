@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29318.209
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{F2418F56-9620-4BA3-9078-D9732EC8DD48}"
 EndProject
@@ -65,6 +65,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grand.Plugin.Widgets.FacebookPixel", "Plugins\Grand.Plugin.Widgets.FacebookPixel\Grand.Plugin.Widgets.FacebookPixel.csproj", "{E5400FBA-C6B9-4477-83F3-8EA523B62232}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grand.Domain", "Grand.Domain\Grand.Domain.csproj", "{2E42CE7C-1183-45AB-A995-1E23C4DCB5F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HackTests", "Tests\HackTests\HackTests.csproj", "{36BB46A7-77AF-4696-BA28-C11E8CAFAC73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -174,6 +176,10 @@ Global
 		{2E42CE7C-1183-45AB-A995-1E23C4DCB5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E42CE7C-1183-45AB-A995-1E23C4DCB5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E42CE7C-1183-45AB-A995-1E23C4DCB5F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36BB46A7-77AF-4696-BA28-C11E8CAFAC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36BB46A7-77AF-4696-BA28-C11E8CAFAC73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36BB46A7-77AF-4696-BA28-C11E8CAFAC73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36BB46A7-77AF-4696-BA28-C11E8CAFAC73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -203,6 +209,7 @@ Global
 		{EC08558B-8993-49DC-8DB7-F96369740732} = {615BCD39-09A7-4924-AB80-AA4032D477D1}
 		{E5400FBA-C6B9-4477-83F3-8EA523B62232} = {615BCD39-09A7-4924-AB80-AA4032D477D1}
 		{2E42CE7C-1183-45AB-A995-1E23C4DCB5F3} = {F2418F56-9620-4BA3-9078-D9732EC8DD48}
+		{36BB46A7-77AF-4696-BA28-C11E8CAFAC73} = {02A095EA-356B-4419-86B4-E7893017CBF2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65BA1180-F5CC-42E1-B689-71E14D588393}
