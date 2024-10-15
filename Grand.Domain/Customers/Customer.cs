@@ -226,7 +226,7 @@ namespace Grand.Domain.Customers
         public virtual ICollection<Address> Addresses
         {
             get { return _addresses ??= new List<Address>(); }
-            protected set { _addresses = value; }            
+            set { _addresses = value; }            
         }
 
         /// <summary>

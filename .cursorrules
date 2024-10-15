@@ -1,0 +1,216 @@
+# Unit Testing Guidelines for .NET Project
+
+## Overview
+You are a senior .NET developer specializing in C# and .NET 6. Your primary goal is to generate high-quality unit tests for a large project using NUnit, Moq, FluentAssertions, and other relevant tools. You are experienced in Visual Studio, Entity Framework Core, and Test-Driven Development (TDD).
+
+## Workflow and Development Environment
+- All unit tests should be developed and executed within Visual Studio (version appropriate for .NET 6).
+- Code will follow the structure and conventions of a large project, with namespaces and test organization reflecting the domain.
+- Tests will be developed using NUnit, with dependencies mocked using Moq, and FluentAssertions for expressive and clear assertions.
+
+## Testing Code Style and Structure
+- Follow the Arrange-Act-Assert (AAA) pattern in unit tests.
+- The namespace for the tests will follow the project's structure and domain, e.g., `Sidetrade.Cloud.Api.Portal.Tests.Application.Controllers`.
+- Test method names should follow the `MethodName_StateUnderTest_ExpectedBehavior` format to clearly define what is being tested.
+- Mock dependencies using Moq to isolate components and create realistic test data.
+- Use the [AutoDomainData] attribute, located in Sidetrade.Cloud.Api.Portal.Tests.Infrastructure, to generate test data.
+- No Setup method should be used.
+- Use FluentAssertions for clear, fluent assertions, enhancing readability and test maintenance.
+
+## Naming Conventions
+- Use PascalCase for class names, test methods, and public members.
+- Test method names should clearly describe the conditions and expected outcomes (e.g., `GetAccessRequestSettingsAsync_VendorIdIsNotValid_BadRequest`).
+
+## Unit Test Writing Guidelines
+- Use AutoFixture to generate mock objects and test data, ensuring tests cover a variety of inputs.
+- Write focused unit tests that verify individual behaviors of components.
+- Mock external dependencies such as services and context providers using Moq.
+- Assert results using FluentAssertions to ensure clarity in failures and test reporting.
+
+## Test Coverage and Code Quality
+- Ensure high code coverage using Coverlet for measuring the test execution coverage.
+- Prioritize testing core business logic, edge cases, and invalid inputs.
+- Avoid testing third-party libraries or framework methods unless necessary for custom behavior.
+
+## Sample Unit Test Structure
+Here's an enhanced structure for your unit tests, adhering to the project's conventions and using the mentioned packages:
+
+```csharp
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Moq;
+using NUnit.Framework;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using Sidetrade.Cloud.Api.Portal.Application.Controllers.V1;
+using Sidetrade.Foundation.Context;
+using Sidetrade.Cloud.Api.Portal.Domain.Interfaces.Repositories.Services;
+using Sidetrade.Cloud.Api.Portal.Application.Models.AccessRequestSettings;
+using Sidetrade.Cloud.Api.Portal.Domain.Entities;
+
+namespace Sidetrade.Cloud.Api.Portal.Tests.Application.Controllers
+{
+    public class AccessRequestSettingControllerTests
+    {
+        #region GetAccessRequestSettingsAsync
+
+        [Test]
+        [AutoDomainData]
+        public async Task GetAccessRequestSettingsAsync_VendorIdIsNotValid_BadRequest(
+            Mock<ICurrentContextProvider> currentContextProvider,
+            Mock<IAccessRequestSettingService> accessRequestSettingService,
+            ILogger<AccessRequestSettingController> logger,
+            IMapper mapper)
+        {
+            // Arrange
+            currentContextProvider.Setup(provider => provider.VendorId).Returns(() => null);
+
+            var controller = new AccessRequestSettingController(
+                mapper,
+                currentContextProvider.Object,
+                accessRequestSettingService.Object,
+                logger
+            );
+
+            // Act
+            var actionResult = await controller.GetAccessRequestSettingsAsync(CancellationToken.None);
+            var result = actionResult.Result as ObjectResult;
+
+            // Assert
+            result!.StatusCode.Should().Be(400);
+            result.Value.Should().Be("Vendor ID is not valid");
+        }
+
+        [Test]
+        [AutoDomainData]
+        public async Task GetAccessRequestSettingsAsync_ValidData_Result(
+            Mock<ICurrentContextProvider> currentContextProvider,
+            Mock<IAccessRequestSettingService> accessRequestSettingService,
+            ILogger<AccessRequestSettingController> logger,
+            AccessRequestSettings accessRequestSettingEntity,
+            IMapper mapper,
+            int vendorId)
+        {
+            // Arrange
+            currentContextProvider.Setup(provider => provider.VendorId).Returns(vendorId);
+            var expectedResult = mapper.Map<AccessRequestSettingResponse>(accessRequestSettingEntity);
+
+            accessRequestSettingService.Setup(service => service.GetAccessRequestSettingsAsync(CancellationToken.None))
+                .ReturnsAsync(accessRequestSettingEntity);
+
+            var controller = new AccessRequestSettingController(
+                mapper,
+                currentContextProvider.Object,
+                accessRequestSettingService.Object,
+                logger
+            );
+
+            // Act
+            var actionResult = await controller.GetAccessRequestSettingsAsync(CancellationToken.None);
+            var result = actionResult.Result as ObjectResult;
+
+            // Assert
+            result!.StatusCode.Should().Be(200);
+            result.Value.Should().BeEquivalentTo<AccessRequestSettingResponse>(expectedResult);
+        }
+
+        #endregion
+
+        #region AddOrUpdateAccessRequestSettingsAsync
+
+        [Test]
+        [AutoDomainData]
+        public async Task AddOrUpdateAccessRequestSettingsAsync_DataIsValid_200Response(
+            Mock<ICurrentContextProvider> currentContextProvider,
+            Mock<IAccessRequestSettingService> accessRequestSettingService,
+            ILogger<AccessRequestSettingController> logger,
+            AccessRequestSettingRequest request,
+            IMapper mapper,
+            int vendorId,
+            int metaVendorId,
+            int userId)
+        {
+            // Arrange
+            currentContextProvider.Setup(provider => provider.VendorId).Returns(vendorId);
+            currentContextProvider.Setup(provider => provider.MetaVendorId).Returns(metaVendorId);
+            currentContextProvider.Setup(provider => provider.UserId).Returns(userId);
+
+            var entity = mapper.Map<AccessRequestSettings>(request);
+
+            accessRequestSettingService.Setup(service => service.AddOrUpdateAccessRequestSettingsAsync(entity, CancellationToken.None))
+                .ReturnsAsync(entity);
+
+            var controller = new AccessRequestSettingController(
+                mapper,
+                currentContextProvider.Object,
+                accessRequestSettingService.Object,
+                logger
+            );
+
+            // Act
+            var actionResult = await controller.AddOrUpdateAccessRequestSettingsAsync(request, CancellationToken.None);
+            var result = actionResult.Result as ObjectResult;
+
+            // Assert
+            var expectedResponse = mapper.Map<AccessRequestSettingResponse>(entity);
+            result!.StatusCode.Should().Be(200);
+            result.Value.Should().BeEquivalentTo(expectedResponse);
+        }
+
+        #endregion
+    }
+}
+
+
+        [Test]
+        [Category("ItemsControllerTests")]
+        public async Task GetItemsAsync_When_ValidDataForLogs_Expect_Result()
+        {
+            // Arrange
+            var expected = new CompanyItemCollection()
+            {
+                Items = new List<CompanyItem>() {
+                    new CompanyItem() { VendorId = 301950, CompanyId = 3993, ActionId = 1, FunctionalItemNumber="909" }
+                }
+            };
+            var expectedLogs = new List<PaymentItemStatus>()
+            {
+                new PaymentItemStatus() {  DateModified = DateTime.Now, Email="test@sidetrade.com", ItemId = 909 },
+                new PaymentItemStatus() {  DateModified = DateTime.Now, Email="test@sidetrade.com", ItemId = 100 },
+            };
+
+            var logger = Mock.Of<ILogger<ItemsController>>();
+            var mapper = GetService<IMapper>() ?? Mock.Of<IMapper>();
+            var itemService = new Mock<IItemService>();
+            var paymentService = new Mock<IPaymentGatewayService>();
+            itemService.Setup(service => service.GetCompanyItemsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<List<string>?>(), It.IsAny<List<string>>(), It.IsAny<List<string>>(), It.IsAny<string?>())).ReturnsAsync(expected);
+            paymentService.Setup(service => service.GetPaidPaymentLogsForBuyerAsync(It.IsAny<PaymentLog>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedLogs);
+
+            var controller = new ItemsController(logger, itemService.Object, paymentService.Object, mapper, new Mock<IStripeConnectHelper>().Object);
+
+            // Act
+            var actionResult = await controller.GetItemsAsync(new Portal.Application.Models.Requests.SearchItemRequest() { VendorId = 301950, CompanyId = 3993 }, CancellationToken.None);
+            var result = actionResult.Result as ObjectResult;
+
+            // Assert
+            result?.StatusCode.Should().Be(200);
+            result?.Value.Should().NotBeNull();
+        }
+```
+
+## Testing and Debugging Tools
+- Utilize Visual Studio or Rider IDE for running and debugging unit tests.
+- Use Moq for mocking dependencies, and FluentAssertions for readable and precise assertions.
+- Integrate Coverlet for code coverage analysis to ensure comprehensive test coverage.
+
+## Key Libraries and Frameworks:
+- NUnit (3.13.3)
+- Moq (4.17.2)
+- FluentAssertions (6.6.0)
+- AutoFixture, AutoFixture.AutoMoq, AutoFixture.NUnit3
+- Microsoft.EntityFrameworkCore.InMemory
+- Coverlet (coverlet.msbuild, coverlet.collector)
+
+## Future Improvements
+- As the project evolves, implement integration testing using similar patterns, focusing on isolating service layers and external dependencies.
+- Integrate the unit tests into the CI/CD pipeline to ensure continuous validation of your codebase.
